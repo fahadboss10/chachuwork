@@ -32,6 +32,81 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding: 0; }
 
+    /* Security Lock Modal Overlay */
+    #lockScreen {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+    }
+    .lock-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.75rem;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      animation: scaleIn 0.25s ease-out;
+    }
+    @keyframes scaleIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .lock-icon-bubble {
+      width: 60px;
+      height: 60px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      margin: 0 auto 1.25rem;
+    }
+    .lock-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .lock-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
+    .pin-input {
+      text-align: center;
+      letter-spacing: 0.45em;
+      font-size: 1.4rem;
+      font-weight: 800;
+      padding: 12px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      width: 100%;
+      margin-bottom: 1rem;
+      background: #fafbfc;
+      outline: none;
+    }
+    .pin-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    }
+    .pin-error {
+      font-size: 0.82rem;
+      color: var(--danger);
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
     /* Top Navigation Bar */
     header {
       background: var(--surface);
@@ -76,7 +151,7 @@
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
     .badge-status {
       display: inline-flex;
@@ -269,9 +344,9 @@
       background: var(--surface);
       border: 1.5px solid var(--border);
       color: var(--text);
-      padding: 9px 14px;
+      padding: 8px 12px;
       border-radius: var(--radius-md);
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
@@ -403,7 +478,7 @@
       font-weight: 600;
       box-shadow: var(--shadow-lg);
       transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      z-index: 100;
+      z-index: 1000;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -412,6 +487,20 @@
   </style>
 </head>
 <body>
+
+  <!-- First-Time Device Security Pin Overlay -->
+  <div id="lockScreen" style="display: none;">
+    <div class="lock-card">
+      <div class="lock-icon-bubble">🔒</div>
+      <div class="lock-title">Device Verification</div>
+      <div class="lock-desc">Please enter the security password to authenticate this device and access production logs.</div>
+      <form onsubmit="handleAuth(event)">
+        <input type="password" id="passInput" class="pin-input" placeholder="••••••" maxlength="10" autocomplete="current-password" autofocus>
+        <div id="pinError" class="pin-error">Incorrect password. Please try again.</div>
+        <button type="submit" class="btn-primary">Unlock Device</button>
+      </form>
+    </div>
+  </div>
 
   <!-- Top App Bar -->
   <header>
@@ -433,6 +522,9 @@
         <a class="btn-secondary" style="text-decoration:none;" href="https://docs.google.com/spreadsheets/d/1ZKskBuvRjK8Kt5U1fTwux2CUfC1hQncqm3asWTtdLU0/edit?usp=sharing" target="_blank" title="Open Google Sheet">
           📊 Sheet ↗
         </a>
+        <button class="btn-secondary" onclick="lockDevice()" title="Lock Device">
+          🔒
+        </button>
       </div>
     </div>
   </header>
@@ -543,6 +635,7 @@
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzT3EEnM9AmBwFdrblYkscFcjY_DTS0X-9nIOS9KbTtn5OSHq-bJJUNvBBA9U9_3zxBAA/exec";
+    const APP_PASSWORD = "220921"; // Updated: 210921 requested by user
 
     const INITIAL_PRODUCTS = [
       "Fiber Powerbank 4x4 DNS",
@@ -559,7 +652,49 @@
     let products = [];
     let counts = {};
 
+    function checkAuth() {
+      const isAuth = localStorage.getItem('device_auth_verified');
+      const lockScreen = document.getElementById('lockScreen');
+      if (isAuth !== 'true') {
+        lockScreen.style.display = 'flex';
+        document.getElementById('passInput').focus();
+        return false;
+      } else {
+        lockScreen.style.display = 'none';
+        return true;
+      }
+    }
+
+    function handleAuth(e) {
+      e.preventDefault();
+      const entered = document.getElementById('passInput').value;
+      const errorMsg = document.getElementById('pinError');
+      if (entered === "210921") {
+        localStorage.setItem('device_auth_verified', 'true');
+        document.getElementById('lockScreen').style.display = 'none';
+        triggerToast('Device Verified Successfully! ✓');
+        initDashboard();
+      } else {
+        errorMsg.style.display = 'block';
+        document.getElementById('passInput').value = '';
+        document.getElementById('passInput').focus();
+      }
+    }
+
+    function lockDevice() {
+      if (confirm('Lock this device? You will need the password to reopen.')) {
+        localStorage.removeItem('device_auth_verified');
+        location.reload();
+      }
+    }
+
     function init() {
+      if (checkAuth()) {
+        initDashboard();
+      }
+    }
+
+    function initDashboard() {
       const stored = localStorage.getItem('chachu_products_list');
       products = stored ? JSON.parse(stored) : [...INITIAL_PRODUCTS];
       if (!stored) localStorage.setItem('chachu_products_list', JSON.stringify(products));
