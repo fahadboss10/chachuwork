@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Production Tracker Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding: 0; }
+
+    /* Top Navigation Bar */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      padding: 0 1.25rem;
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 1.1rem;
+      box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    }
+    .brand-title {
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--success-light);
+      color: var(--success);
+      border: 1px solid #bbf7d0;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Main Responsive Grid Layout */
+    .app-container {
+      max-width: 1200px;
+      margin: 1.5rem auto;
+      padding: 0 1rem;
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 900px) {
+      .app-container {
+        grid-template-columns: 1fr;
+        margin: 1rem auto;
+        padding: 0 0.75rem;
+      }
+    }
+
+    /* Card Panels */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      height: fit-content;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-heading {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Form Controls */
+    .input-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .input-group {
+      margin-bottom: 1.25rem;
+    }
+    input[type="date"], input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #fafbfc;
+      color: var(--text);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    input[type="date"]:focus, input[type="text"]:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+
+    /* Interactive Product Rows */
+    .items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 1.25rem;
+    }
+    .item-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .item-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: var(--shadow-sm);
+    }
+    .item-info {
+      flex: 1;
+      padding-right: 12px;
+    }
+    .item-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .counter-widget {
+      display: flex;
+      align-items: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      padding: 3px;
+      gap: 4px;
+    }
+    .btn-step {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+    }
+    .btn-step:active {
+      transform: scale(0.92);
+    }
+    .btn-step.minus { color: var(--danger); }
+    .btn-step.plus { color: var(--primary); }
+    .count-value {
+      min-width: 34px;
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    /* Action Buttons */
+    .btn-primary {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 9px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .btn-secondary:hover { background: #f1f5f9; border-color: #cbd5e1; }
+
+    /* Summary Breakdown */
+    .stat-card {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      color: white;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stat-label { font-size: 0.85rem; color: #94a3b8; font-weight: 600; }
+    .stat-number { font-size: 1.85rem; font-weight: 800; color: #38bdf8; }
+
+    .summary-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 1rem;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #fafbfc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+    }
+    .summary-row span { font-weight: 500; }
+    .summary-row strong { font-weight: 700; color: var(--primary); }
+
+    /* Export Box & Social Actions */
+    .export-box {
+      width: 100%;
+      height: 90px;
+      background: #f8fafc;
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      font-family: monospace;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      resize: none;
+      outline: none;
+      margin-bottom: 12px;
+    }
+    .share-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    @media (max-width: 480px) {
+      .share-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .btn-share {
+      border: none;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: opacity 0.15s ease;
+    }
+    .btn-share:hover { opacity: 0.92; }
+    .btn-wa { background: #25d366; }
+    .btn-smb { background: #075e54; }
+    .btn-copy { background: #0f172a; }
+    .btn-more { background: #475569; }
+
+    /* Product Tags Settings */
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .tag-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .tag-remove {
+      cursor: pointer;
+      color: var(--danger);
+      font-weight: 700;
+      border: none;
+      background: none;
+      font-size: 0.95rem;
+    }
+
+    /* Feedback Banner */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #0f172a;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 9999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- Top App Bar -->
+  <header>
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <div class="brand-title">Production Tracker</div>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <span class="badge-status">
+          <span class="status-dot"></span>
+          <span>Google Live Sync</span>
+        </span>
+        <button class="btn-secondary" onclick="syncFromGoogle(true)" title="Force Refresh">
+          🔄 Sync
+        </button>
+        <a class="btn-secondary" style="text-decoration:none;" href="https://docs.google.com/spreadsheets/d/1ZKskBuvRjK8Kt5U1fTwux2CUfC1hQncqm3asWTtdLU0/edit?usp=sharing" target="_blank" title="Open Google Sheet">
+          📊 Sheet ↗
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Responsive Dashboard Container -->
+  <main class="app-container">
+
+    <!-- Column 1: Daily Production Entry Form -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-heading">
+          <span>📝 Daily Production</span>
+        </div>
+        <span id="loadIndicator" style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Syncing...</span>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="entryDate">Production Date</label>
+        <input type="date" id="entryDate">
+      </div>
+
+      <div class="items-list" id="itemsContainer">
+        <!-- Rendered Dynamically -->
+      </div>
+
+      <button class="btn-primary" id="saveBtn" onclick="saveDayRecord()">
+        <span>💾 Save Record to Google Cloud</span>
+      </button>
+
+      <!-- Manage Products Accordion -->
+      <div style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">CUSTOMIZE PRODUCTS</span>
+          <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.78rem;" onclick="toggleManage()">+ Add Product</button>
+        </div>
+        <div id="manageBox" style="display: none; margin-top: 10px;">
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="newProductName" placeholder="e.g. Litebeam 5AC Gen2 Repair">
+            <button class="btn-primary" style="width: auto; padding: 0 16px; margin: 0; white-space: nowrap;" onclick="addNewProduct()">Add</button>
+          </div>
+          <div class="tags-container" id="tagsContainer"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Column 2: Weekly Report & Summary Intelligence -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-heading">
+          <span>📈 Weekly Summary & Reports</span>
+        </div>
+      </div>
+
+      <!-- Quick KPI Total Card -->
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">TOTAL UNITS PRODUCED</div>
+          <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 2px;">Filtered timeframe total</div>
+        </div>
+        <div class="stat-number" id="totalPcsBadge">0</div>
+      </div>
+
+      <!-- Date Range Filter -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+        <div>
+          <label class="input-label">Start Date</label>
+          <input type="date" id="filterStart">
+        </div>
+        <div>
+          <label class="input-label">End Date</label>
+          <input type="date" id="filterEnd">
+        </div>
+      </div>
+
+      <button class="btn-secondary" style="width: 100%; justify-content: center; margin-bottom: 1rem;" onclick="calculateSummary()">
+        🔍 Recalculate Timeframe
+      </button>
+
+      <!-- Detailed Breakdown -->
+      <div class="summary-rows" id="summaryResults">
+        <!-- Rendered items -->
+      </div>
+
+      <!-- Export Text Area -->
+      <label class="input-label">Export Preview</label>
+      <textarea id="reportText" class="export-box" readonly placeholder="Calculated summary report preview..."></textarea>
+
+      <!-- Multi-Channel Dispatch -->
+      <div class="share-grid">
+        <button class="btn-share btn-wa" onclick="shareViaApp('wa')">
+          <span>💬 WhatsApp</span>
+        </button>
+        <button class="btn-share btn-smb" onclick="shareViaApp('smb')">
+          <span>💼 WA Business</span>
+        </button>
+        <button class="btn-share btn-copy" onclick="copyWeeklySummary()">
+          <span>📋 Copy Text</span>
+        </button>
+        <button class="btn-share btn-more" onclick="shareGeneral()">
+          <span>📤 More Apps</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast">Record saved successfully!</div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzT3EEnM9AmBwFdrblYkscFcjY_DTS0X-9nIOS9KbTtn5OSHq-bJJUNvBBA9U9_3zxBAA/exec";
+
+    const INITIAL_PRODUCTS = [
+      "Fiber Powerbank 4x4 DNS",
+      "Fiber Powerbank 6 Cell White",
+      "Fiber Powerbank 6 Cell New Body",
+      "Fiber Powerbank 6 Cell Small",
+      "UBNT Powerbank 4x4 DNS",
+      "UBNT Powerbank New Body",
+      "Charger 13.5V 6A",
+      "Charger 14.5V 10A",
+      "POE Convert DC"
+    ];
+
+    let products = [];
+    let counts = {};
+
+    function init() {
+      const stored = localStorage.getItem('chachu_products_list');
+      products = stored ? JSON.parse(stored) : [...INITIAL_PRODUCTS];
+      if (!stored) localStorage.setItem('chachu_products_list', JSON.stringify(products));
+
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('entryDate').value = today;
+
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 6);
+      document.getElementById('filterStart').value = lastWeek.toISOString().split('T')[0];
+      document.getElementById('filterEnd').value = today;
+
+      resetCounts();
+      renderItems();
+      renderTags();
+      loadDayRecord(today);
+      calculateSummary();
+
+      document.getElementById('entryDate').addEventListener('change', (e) => {
+        loadDayRecord(e.target.value);
+      });
+
+      syncFromGoogle(false);
+    }
+
+    async function syncFromGoogle(notify) {
+      const ind = document.getElementById('loadIndicator');
+      ind.innerText = 'Syncing...';
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        if (data && typeof data === 'object') {
+          const local = JSON.parse(localStorage.getItem('chachu_work_data') || '{}');
+          localStorage.setItem('chachu_work_data', JSON.stringify({ ...local, ...data }));
+
+          let added = false;
+          Object.values(data).forEach(day => {
+            Object.keys(day).forEach(item => {
+              if (!products.includes(item)) {
+                products.push(item);
+                added = true;
+              }
+            });
+          });
+
+          if (added) {
+            localStorage.setItem('chachu_products_list', JSON.stringify(products));
+            renderItems();
+            renderTags();
+          }
+
+          loadDayRecord(document.getElementById('entryDate').value);
+          calculateSummary();
+          ind.innerText = 'Connected ✓';
+          if (notify) triggerToast('Data synchronized with Google Sheet!');
+        }
+      } catch (err) {
+        ind.innerText = 'Offline Mode';
+      }
+    }
+
+    function toggleManage() {
+      const box = document.getElementById('manageBox');
+      box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function addNewProduct() {
+      const input = document.getElementById('newProductName');
+      const val = input.value.trim();
+      if (!val) return;
+      if (products.includes(val)) return alert('Product already exists in list');
+
+      products.push(val);
+      localStorage.setItem('chachu_products_list', JSON.stringify(products));
+      input.value = '';
+      counts[val] = 0;
+      renderItems();
+      renderTags();
+      updateDisplay();
+    }
+
+    function removeProduct(idx) {
+      const item = products[idx];
+      if (!confirm(`Remove "${item}" from daily list?`)) return;
+      products.splice(idx, 1);
+      delete counts[item];
+      localStorage.setItem('chachu_products_list', JSON.stringify(products));
+      renderItems();
+      renderTags();
+      updateDisplay();
+      calculateSummary();
+    }
+
+    function renderTags() {
+      document.getElementById('tagsContainer').innerHTML = products.map((item, idx) => `
+        <div class="tag-item">
+          <span>${item}</span>
+          <button class="tag-remove" onclick="removeProduct(${idx})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function resetCounts() {
+      counts = {};
+      products.forEach(p => counts[p] = 0);
+    }
+
+    function renderItems() {
+      document.getElementById('itemsContainer').innerHTML = products.map((item, idx) => `
+        <div class="item-card">
+          <div class="item-info">
+            <div class="item-title">${item}</div>
+          </div>
+          <div class="counter-widget">
+            <button class="btn-step minus" onclick="changeCount('${item}', -1)">−</button>
+            <div class="count-value" id="count-${idx}">0</div>
+            <button class="btn-step plus" onclick="changeCount('${item}', 1)">+</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateDisplay() {
+      products.forEach((item, idx) => {
+        const el = document.getElementById(`count-${idx}`);
+        if (el) el.innerText = counts[item] || 0;
+      });
+    }
+
+    function changeCount(item, delta) {
+      counts[item] = Math.max(0, (counts[item] || 0) + delta);
+      updateDisplay();
+    }
+
+    async function saveDayRecord() {
+      const date = document.getElementById('entryDate').value;
+      if (!date) return alert('Please choose a valid date.');
+
+      const local = JSON.parse(localStorage.getItem('chachu_work_data') || '{}');
+      local[date] = { ...counts };
+      localStorage.setItem('chachu_work_data', JSON.stringify(local));
+
+      calculateSummary();
+      triggerToast('Saving to Google Sheet...');
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date, items: counts })
+        });
+        triggerToast('Saved & Synchronized Successfully! ✓');
+      } catch (e) {
+        triggerToast('Saved locally. Cloud sync pending.');
+      }
+    }
+
+    function loadDayRecord(date) {
+      resetCounts();
+      const local = JSON.parse(localStorage.getItem('chachu_work_data') || '{}');
+      if (local[date]) {
+        Object.keys(local[date]).forEach(k => counts[k] = local[date][k]);
+      }
+      updateDisplay();
+    }
+
+    function buildReportText() {
+      const start = document.getElementById('filterStart').value;
+      const end = document.getElementById('filterEnd').value;
+      const data = JSON.parse(localStorage.getItem('chachu_work_data') || '{}');
+
+      let totals = {};
+      let totalAll = 0;
+
+      Object.keys(data).forEach(d => {
+        if (d >= start && d <= end) {
+          Object.keys(data[d]).forEach(p => {
+            const qty = data[d][p] || 0;
+            totals[p] = (totals[p] || 0) + qty;
+            totalAll += qty;
+          });
+        }
+      });
+
+      let text = `📦 *Chachu Work Report*\n🗓️ ${start} se ${end}\n------------------------\n`;
+      let hasData = false;
+
+      Object.keys(totals).forEach(p => {
+        if (totals[p] > 0) {
+          text += `• ${p}: *${totals[p]} pcs*\n`;
+          hasData = true;
+        }
+      });
+
+      if (!hasData) return { text: '', totalAll: 0, totals: {} };
+      text += `------------------------\n*Total Units: ${totalAll} pcs*`;
+      return { text, totalAll, totals };
+    }
+
+    function calculateSummary() {
+      const { text, totalAll, totals } = buildReportText();
+      const container = document.getElementById('summaryResults');
+      const preview = document.getElementById('reportText');
+
+      preview.value = text ? text.replace(/\*/g, '') : 'No production logs found for selected dates.';
+      document.getElementById('totalPcsBadge').innerText = totalAll;
+
+      if (totalAll === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:1.5rem; color:#94a3b8; font-size:0.88rem;">No work logged for this period.</div>';
+        return;
+      }
+
+      container.innerHTML = Object.keys(totals).filter(k => totals[k] > 0).map(p => `
+        <div class="summary-row">
+          <span>${p}</span>
+          <strong>${totals[p]} pcs</strong>
+        </div>
+      `).join('');
+    }
+
+    function copyWeeklySummary() {
+      const { text } = buildReportText();
+      if (!text) return alert('No records found for timeframe.');
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => triggerToast('Report copied to clipboard!'));
+      } else {
+        const ta = document.getElementById('reportText');
+        ta.select();
+        document.execCommand('copy');
+        triggerToast('Report copied!');
+      }
+    }
+
+    function shareViaApp(type) {
+      const { text } = buildReportText();
+      if (!text) return alert('No records found to share.');
+      const enc = encodeURIComponent(text);
+
+      if (type === 'smb') {
+        window.location.href = "intent://send?text=" + enc + "#Intent;package=com.whatsapp.w4b;scheme=whatsapp;end";
+      } else {
+        window.location.href = "whatsapp://send?text=" + enc;
+      }
+    }
+
+    function shareGeneral() {
+      const { text } = buildReportText();
+      if (!text) return alert('No records to share.');
+      if (navigator.share) {
+        navigator.share({ title: 'Production Report', text });
+      } else {
+        copyWeeklySummary();
+      }
+    }
+
+    function triggerToast(msg) {
+      const el = document.getElementById('toast');
+      el.innerText = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2800);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
